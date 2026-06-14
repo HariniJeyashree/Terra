@@ -361,6 +361,8 @@ export default function LogEntryModal({ onClose, onSave, city }: LogEntryModalPr
             <button
               type="button"
               onClick={onClose}
+              role="button"
+              aria-label="Cancel footprint log entry creation"
               className="flex-1 py-3 text-xs text-white/60 hover:text-white border border-white/10 hover:bg-white/5 rounded-xl cursor-pointer font-semibold transition-colors"
             >
               Cancel
@@ -368,6 +370,8 @@ export default function LogEntryModal({ onClose, onSave, city }: LogEntryModalPr
             <button
               type="submit"
               disabled={preCalculating}
+              role="button"
+              aria-label="Log domestic carbon interaction and save activity"
               className="flex-1 py-3 text-xs text-black bg-emerald-500 hover:scale-[1.02] shadow-lg shadow-emerald-500/10 font-bold rounded-xl cursor-pointer transition-transform disabled:opacity-50"
             >
               Save Entry

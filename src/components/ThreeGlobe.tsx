@@ -748,7 +748,13 @@ export default function ThreeGlobe({ city, co2Value }: GlobeProps) {
   }, [city, co2Value, glowColor]);
 
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0 rounded-3xl" id="earth_interactive_stage">
+    <div 
+      className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0 rounded-3xl" 
+      id="earth_interactive_stage"
+      role="img" 
+      aria-label="Interactive 3D Earth Globe visualizing real-time Indian municipal carbon telemetry"
+      tabIndex={0}
+    >
       <canvas ref={canvasRef} className="w-full h-full opacity-75" />
       
       {/* Front-facing glowing percentile metadata badges overlay */}

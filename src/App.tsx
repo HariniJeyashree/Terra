@@ -18,7 +18,7 @@ import {
 
 import LoginScreen from "./components/LoginScreen";
 import Onboarding from "./components/Onboarding";
-import ThreeGlobe from "./components/ThreeGlobe";
+const ThreeGlobe = React.lazy(() => import("./components/ThreeGlobe"));
 import { DonutRing, TrendForecastLineChart } from "./components/D3Charts";
 import LogEntryModal from "./components/LogEntryModal";
 import CarbonCoach from "./components/CarbonCoach";
@@ -321,10 +321,15 @@ export default function App() {
   };
 
   // ─── Derived stats ────────────────────────────────────────────────────────────
-  const todayEmissions = emissions.filter((e) => {
-    return new Date(e.timestamp).toDateString() === new Date().toDateString();
-  });
-  const todayCo2Sum = parseFloat(todayEmissions.reduce((s, e) => s + e.value_kg, 0).toFixed(1));
+  const todayEmissions = React.useMemo(() => {
+    return emissions.filter((e) => {
+      return new Date(e.timestamp).toDateString() === new Date().toDateString();
+    });
+  }, [emissions]);
+
+  const todayCo2Sum = React.useMemo(() => {
+    return parseFloat(todayEmissions.reduce((s, e) => s + e.value_kg, 0).toFixed(1));
+  }, [todayEmissions]);
 
   let realComparisonString = "Your ledger is clean! Log your first activity to start tracking.";
   if (todayCo2Sum > 0 && todayEmissions[0]?.metadata?.comparisonQuote) {
@@ -446,7 +451,7 @@ export default function App() {
       </header>
 
       {/* Mobile nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-black/90 border-t border-white/10 backdrop-blur-lg px-2 py-2 flex justify-around">
+      <nav aria-label="Mobile Navigation Drawer" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-black/90 border-t border-white/10 backdrop-blur-lg px-2 py-2 flex justify-around">
         {[
           { id: "dashboard", label: "Metrics", icon: <TrendingUp className="w-4 h-4" /> },
           { id: "coach", label: "AI Coach", icon: <Bot className="w-4 h-4" /> },
@@ -456,6 +461,7 @@ export default function App() {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as any)}
+            aria-label={`Open tab: ${t.label}`}
             className={`flex flex-col items-center gap-1.5 py-1 px-3 text-[10px] rounded-lg cursor-pointer transition-colors ${
               activeTab === t.id ? "text-emerald-400 font-bold" : "text-white/40"
             }`}
@@ -464,7 +470,7 @@ export default function App() {
             <span>{t.label}</span>
           </button>
         ))}
-      </div>
+      </nav>
 
       {/* Nudge alerts */}
       {nudges.length > 0 && (
@@ -529,7 +535,9 @@ export default function App() {
 
               {/* Globe */}
               <div className="lg:col-span-6 flex flex-col items-center justify-center relative min-h-[420px] rounded-[30px] border border-white/5 bg-black/40 overflow-hidden shadow-2xl">
-                <ThreeGlobe city={profile.city} co2Value={todayCo2Sum} />
+                <React.Suspense fallback={<div className="animate-pulse bg-[#050708] h-full w-full rounded-2xl flex flex-col items-center justify-center text-xs text-emerald-400 font-mono">Loading Celestial Interactive Globe...</div>}>
+                  <ThreeGlobe city={profile.city} co2Value={todayCo2Sum} />
+                </React.Suspense>
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/70 backdrop-blur-md px-6 py-3.5 rounded-full border border-white/10 z-10 shadow-xl select-none">
                   <span className="text-xs font-semibold text-white flex items-center gap-2">
                     <Flame className="w-4 h-4 text-amber-500 animate-pulse fill-amber-500" />
