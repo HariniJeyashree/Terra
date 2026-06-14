@@ -1,19 +1,20 @@
 import { expect, test, describe } from 'vitest';
 
 // Represents standard vehicle sector coefficient matching calculation models
+// Added a 1e-9 precision buffer to ensure floating point midpoints round up correctly
 function calculateCarbonSavings(milesDriven: number): number {
-  return Math.round(milesDriven * 0.411 * 100) / 100; // Standard coefficient
+  return Math.round((milesDriven * 0.411) * 100 + 1e-9) / 100; 
 }
 
 // Calculates grid emissions by Indian region (e.g. South grid vs. West grid)
 function calculateIndianGridEmissions(kwh: number, gridFactor: number = 0.72): number {
-  return Math.round(kwh * gridFactor * 100) / 100;
+  return Math.round((kwh * gridFactor) * 100 + 1e-9) / 100;
 }
 
 // Calculates transport sector emissions realistically per vehicle type
 function calculateTransportEmission(distanceKm: number, vehicleType: string): number {
   const coefficients: Record<string, number> = {
-    "petrol car": 0.170, // kg CO2 per km for dynamic models
+    "petrol car": 0.170, 
     "diesel car": 0.150,
     "electric car": 0.050,
     "auto": 0.080,
@@ -22,20 +23,20 @@ function calculateTransportEmission(distanceKm: number, vehicleType: string): nu
     "train": 0.012
   };
   const factor = coefficients[vehicleType] ?? 0.120;
-  return Math.round(distanceKm * factor * 100) / 100;
+  return Math.round((distanceKm * factor) * 100 + 1e-9) / 100;
 }
 
 describe('Carbon Footprint Calculator Calculations', () => {
   test('Calculates correct carbon offset savings', () => {
     expect(calculateCarbonSavings(10)).toBe(4.11);
     expect(calculateCarbonSavings(0)).toBe(0);
-    expect(calculateCarbonSavings(5)).toBe(2.06); // 2.055 rounded
+    expect(calculateCarbonSavings(5)).toBe(2.06); // This will now perfectly pass!
   });
 
   test('Calculates Indian electrical grid emissions (Bengaluru factor 0.72)', () => {
     expect(calculateIndianGridEmissions(10)).toBe(7.2);
     expect(calculateIndianGridEmissions(100, 0.72)).toBe(72);
-    expect(calculateIndianGridEmissions(250, 0.84)).toBe(210); // Mumbai factor
+    expect(calculateIndianGridEmissions(250, 0.84)).toBe(210); 
   });
 
   test('Calculates transport sector emissions realistically per vehicle type', () => {
@@ -49,3 +50,4 @@ describe('Carbon Footprint Calculator Calculations', () => {
     expect(calculateTransportEmission(10, "unknown")).toBe(1.20);
   });
 });
+
