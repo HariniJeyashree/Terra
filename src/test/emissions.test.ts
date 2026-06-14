@@ -2,12 +2,12 @@ import { expect, test, describe } from 'vitest';
 
 // Represents standard vehicle sector coefficient matching calculation models
 function calculateCarbonSavings(milesDriven: number): number {
-  return parseFloat((milesDriven * 0.411).toFixed(2)); // Standard coefficient
+  return Math.round(milesDriven * 0.411 * 100) / 100; // Standard coefficient
 }
 
 // Calculates grid emissions by Indian region (e.g. South grid vs. West grid)
 function calculateIndianGridEmissions(kwh: number, gridFactor: number = 0.72): number {
-  return parseFloat((kwh * gridFactor).toFixed(2));
+  return Math.round(kwh * gridFactor * 100) / 100;
 }
 
 // Calculates transport sector emissions realistically per vehicle type
@@ -22,7 +22,7 @@ function calculateTransportEmission(distanceKm: number, vehicleType: string): nu
     "train": 0.012
   };
   const factor = coefficients[vehicleType] ?? 0.120;
-  return parseFloat((distanceKm * factor).toFixed(2));
+  return Math.round(distanceKm * factor * 100) / 100;
 }
 
 describe('Carbon Footprint Calculator Calculations', () => {
