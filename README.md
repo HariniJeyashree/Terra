@@ -1,5 +1,9 @@
 # Carbon Footprint Tracker - India Eco-Calculator 🌱
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 An interactive, responsive, full-stack application designed to help users track, calculate, and minimize their daily carbon footprint using localized emission factors for Indian cities. Features an immersive, real-time 3D interactive rotating Earth globe canvas, community gamification, AI-powered tailored eco-action plans (powered by Gemini), and an offline-first highly optimized experience.
 
 ## 🛠️ Tech Stack & Architecture
@@ -9,6 +13,35 @@ An interactive, responsive, full-stack application designed to help users track,
 - **Database/Persistence**: Persistent JSON-based relational state model with reliable schema
 - **AI Integration**: Official `@google/genai` TypeScript SDK for regional Indian localized dynamic impact analyses and personalized carbon containment plans
 - **Testing suite**: Vitest automated unit testing runner
+
+## 🚀 Getting Started
+
+To run this project locally, ensure you have [Node.js](https://nodejs.org/) (v22+) installed.
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/terra-tracker.git
+   cd terra-tracker
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file in the root directory and add your Google Gemini API key:
+   ```env
+   GEMINI_API_KEY=your_actual_api_key_here
+   PORT=3000
+   ```
+
+4. **Start the application:**
+   ```bash
+   npm run build
+   npm run start
+   ```
+   The application will be available at `http://localhost:3000`.
 
 ---
 

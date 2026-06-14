@@ -24,52 +24,56 @@ interface DonutRingProps {
 export function DonutRing({ entries }: DonutRingProps) {
   const [hoveredCategory, setHoveredCategory] = useState<CategoryType | null>(null);
 
-  // Group entries by category
-  const totals: Record<CategoryType, number> = {
-    transport: 0,
-    food: 0,
-    energy: 0,
-    shopping: 0
-  };
+  // Memoize all aggregate calculations to avoid recalculating on hoveredCategory state changes
+  const { totals, grandTotal, categories, segments } = React.useMemo(() => {
+    const totals: Record<CategoryType, number> = {
+      transport: 0,
+      food: 0,
+      energy: 0,
+      shopping: 0
+    };
 
-  entries.forEach((e) => {
-    if (totals[e.category] !== undefined) {
-      totals[e.category] += e.value_kg;
-    }
-  });
-
-  const grandTotal = Object.values(totals).reduce((sum, v) => sum + v, 0);
-
-  // Construct chart portions
-  const categories: { category: CategoryType; value: number; percent: number }[] = [];
-  (Object.keys(totals) as CategoryType[]).forEach((cat) => {
-    const val = totals[cat];
-    categories.push({
-      category: cat,
-      value: val,
-      percent: grandTotal > 0 ? (val / grandTotal) * 100 : 0
+    entries.forEach((e) => {
+      if (totals[e.category] !== undefined) {
+        totals[e.category] += e.value_kg;
+      }
     });
-  });
+
+    const grandTotal = Object.values(totals).reduce((sum, v) => sum + v, 0);
+
+    const categories: { category: CategoryType; value: number; percent: number }[] = [];
+    (Object.keys(totals) as CategoryType[]).forEach((cat) => {
+      const val = totals[cat];
+      categories.push({
+        category: cat,
+        value: val,
+        percent: grandTotal > 0 ? (val / grandTotal) * 100 : 0
+      });
+    });
+
+    const radius = 75;
+    const circumference = 2 * Math.PI * radius;
+
+    let currentOffset = 0;
+    const segments = categories.map((c) => {
+      const dashArray = `${(c.percent / 100) * circumference} ${circumference}`;
+      const dashOffset = -currentOffset;
+      currentOffset += (c.percent / 100) * circumference;
+      return {
+        ...c,
+        dashArray,
+        dashOffset
+      };
+    });
+
+    return { totals, grandTotal, categories, segments };
+  }, [entries]);
 
   // SVG parameters
   const size = 200;
   const radius = 75;
-  const circumference = 2 * Math.PI * radius;
   const strokeWidth = 14;
   const centerCoord = size / 2;
-
-  // Compute stroke offsets
-  let currentOffset = 0;
-  const segments = categories.map((c) => {
-    const dashArray = `${(c.percent / 100) * circumference} ${circumference}`;
-    const dashOffset = -currentOffset;
-    currentOffset += (c.percent / 100) * circumference;
-    return {
-      ...c,
-      dashArray,
-      dashOffset
-    };
-  });
 
   const displayedCategory = hoveredCategory || (categories.reduce((max, cat) => cat.value > max.value ? cat : max, categories[0])?.category || "transport");
   const displayedValue = totals[displayedCategory];
@@ -206,79 +210,83 @@ interface TrendProps {
 }
 
 export function TrendForecastLineChart({ pastEntries, forecastPoints }: TrendProps) {
-  // Aggregate past 7 days emissions
-  const pastDaysMap: Record<string, number> = {};
-  const dateOptions = { weekday: 'short' } as const;
-
-  // Let's take current and past 6 days
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dayStr = d.toLocaleDateString('en-IN', dateOptions);
-    pastDaysMap[dayStr] = 0;
-  }
-
-  pastEntries.forEach((e) => {
-    const dayName = new Date(e.timestamp).toLocaleDateString("en-IN", dateOptions);
-    if (pastDaysMap[dayName] !== undefined) {
-      pastDaysMap[dayName] += e.value_kg;
-    }
-  });
-
-  const chartData: { day: string; value: number; isForecast: boolean }[] = [];
-  
-  // Append past days
-  Object.keys(pastDaysMap).forEach((day) => {
-    chartData.push({
-      day,
-      value: parseFloat(pastDaysMap[day].toFixed(1)),
-      isForecast: false
-    });
-  });
-
-  // Append forecasts
-  forecastPoints.forEach((f) => {
-    const totalPred = Object.values(f.predicted).reduce((sum, v) => sum + v, 0);
-    chartData.push({
-      day: f.date,
-      value: parseFloat(totalPred.toFixed(1)),
-      isForecast: true
-    });
-  });
-
   // SVG boundaries
   const width = 500;
   const height = 140;
   const paddingX = 40;
   const paddingY = 20;
 
-  const maxVal = Math.max(...chartData.map((d) => d.value), 20); // clip min ceiling at 20
-  
-  // Calculate relative coordinate points
-  const points = chartData.map((d, index) => {
-    const x = paddingX + (index * (width - 2 * paddingX)) / (chartData.length - 1);
-    const y = height - paddingY - (d.value / maxVal) * (height - 2 * paddingY);
-    return { x, y, ...d };
-  });
+  // Memoize all calculated points and SVG paths
+  const { chartData, points, pastPath, forecastPath } = React.useMemo(() => {
+    const pastDaysMap: Record<string, number> = {};
+    const dateOptions = { weekday: 'short' } as const;
 
-  // Generate SVG path for line segments
-  let pastPath = "";
-  let forecastPath = "";
-
-  points.forEach((p, idx) => {
-    if (idx === 0) {
-      pastPath += `M ${p.x} ${p.y}`;
-    } else if (idx < 7) {
-      // Connect first 7 points (history)
-      pastPath += ` L ${p.x} ${p.y}`;
-      if (idx === 6) {
-        forecastPath += `M ${p.x} ${p.y}`; // start forecast path from index 6
-      }
-    } else {
-      // Connect remaining (forecast helper segment)
-      forecastPath += ` L ${p.x} ${p.y}`;
+    // Let's take current and past 6 days
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toLocaleDateString('en-IN', dateOptions);
+      pastDaysMap[dayStr] = 0;
     }
-  });
+
+    pastEntries.forEach((e) => {
+      const dayName = new Date(e.timestamp).toLocaleDateString("en-IN", dateOptions);
+      if (pastDaysMap[dayName] !== undefined) {
+        pastDaysMap[dayName] += e.value_kg;
+      }
+    });
+
+    const chartData: { day: string; value: number; isForecast: boolean }[] = [];
+    
+    // Append past days
+    Object.keys(pastDaysMap).forEach((day) => {
+      chartData.push({
+        day,
+        value: parseFloat(pastDaysMap[day].toFixed(1)),
+        isForecast: false
+      });
+    });
+
+    // Append forecasts
+    forecastPoints.forEach((f) => {
+      const totalPred = Object.values(f.predicted).reduce((sum, v) => sum + v, 0);
+      chartData.push({
+        day: f.date,
+        value: parseFloat(totalPred.toFixed(1)),
+        isForecast: true
+      });
+    });
+
+    const maxVal = Math.max(...chartData.map((d) => d.value), 20); // clip min ceiling at 20
+    
+    // Calculate relative coordinate points
+    const points = chartData.map((d, index) => {
+      const x = paddingX + (index * (width - 2 * paddingX)) / (chartData.length - 1);
+      const y = height - paddingY - (d.value / maxVal) * (height - 2 * paddingY);
+      return { x, y, ...d };
+    });
+
+    // Generate SVG path for line segments
+    let pastPath = "";
+    let forecastPath = "";
+
+    points.forEach((p, idx) => {
+      if (idx === 0) {
+        pastPath += `M ${p.x} ${p.y}`;
+      } else if (idx < 7) {
+        // Connect first 7 points (history)
+        pastPath += ` L ${p.x} ${p.y}`;
+        if (idx === 6) {
+          forecastPath += `M ${p.x} ${p.y}`; // start forecast path from index 6
+        }
+      } else {
+        // Connect remaining (forecast helper segment)
+        forecastPath += ` L ${p.x} ${p.y}`;
+      }
+    });
+
+    return { chartData, points, pastPath, forecastPath };
+  }, [pastEntries, forecastPoints]);
 
   return (
     <div className="w-full flex flex-col" id="weekly_trends_container">
