@@ -1,4 +1,4 @@
-# Carbon Footprint Tracker - India Eco-Calculator 🌱
+# Carbon Footprint Tracker - India Eco-Calculator (Terra) 🌱
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
