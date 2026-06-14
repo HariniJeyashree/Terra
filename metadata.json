@@ -1,0 +1,6 @@
+{
+  "name": "Terra",
+  "description": "An AI-powered carbon behavior-change and habit coaching platform for Indian users, featuring a glowing 3D globe, carbon coach, custom action plans, and collaborative circles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
