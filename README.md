@@ -1,54 +1,35 @@
-# 📊 Terra: AI-Powered Habit & Carbon Behavior Change System
+# Carbon Footprint Tracker - India Eco-Calculator 🌱
 
-Terra is a high-fidelity carbon footprint tracking and behavior-modification engine built for the **Prompt Wars Challenge**, organized by **Hack2skill** and **Google for Developers**. By combining interactive, localized 3D visualizations, dynamic context-aware AI coaching, and a zero-latency engine, Terra transforms passive environmental awareness into active daily habit loops.
+An interactive, responsive, full-stack application designed to help users track, calculate, and minimize their daily carbon footprint using localized emission factors for Indian cities. Features an immersive, real-time 3D interactive rotating Earth globe canvas, community gamification, AI-powered tailored eco-action plans (powered by Gemini), and an offline-first highly optimized experience.
 
----
-
-## 🎯 1. Chosen Vertical & Core Objective
-*   **Vertical:** Sustainability & AI-Driven Behavioral Modification Assistant.
-*   **Objective:** To eliminate user drop-off in environmental tracking applications by delivering an instantaneous user experience coupled with deeply hyper-localized, conversational AI guidance.
-
----
-
-## 🧠 2. Approach and Architectural Logic
-
-### A. Zero-Perceived-Latency via Optimistic UI
-Traditional tracking apps stall user interactions behind blocking cloud writes and loading spinners. Terra utilizes an **Optimistic UI Engine** to decouple frontend rendering from database confirmations:
-1. When an entry (transport, food, energy) is logged, client-side range-cap validations run immediately.
-2. The entry modal is dismissed instantly, and local state speculatively generates a `temp-ID`.
-3. Dashboard telemetry, localized D3.js donut rings, and the 3D globe's glow intensity recalculate and animate in parallel.
-4. **State Reconciliation:** The write executes asynchronously to Firestore in the background. If successful, the `temp-ID` swaps seamlessly with the server record. On network failure, a graceful rollback to a secure state snapshot occurs, accompanied by a non-intrusive warning toast.
-
-### B. High-Performance Math Graphics
-To maintain extreme structural efficiency, complex 3D rendering was restricted from heavy WebGL assets that cause frame drops on mobile devices. Terra utilizes a mathematical dot-density engine drawn directly inside an HTMLCanvas2D context, rendering high-fidelity biomes (Sahara Desert, Amazon Jungle) and active city pulse overlays of Indian metropolitan hubs smoothly at 60 FPS.
+## 🛠️ Tech Stack & Architecture
+- **Frontend**: React (v19) & TypeScript, Tailwind CSS, Lucide Icons, Motion (Framer Motion)
+- **Interactive Visualizers**: High-fidelity custom 3D HTML5 Canvas rendering engine (Dynamic Earth Globe with biome-distinct land points, dynamic atmospheric halos, cloud shadows, and sparkling nighttime urban city web)
+- **Backend**: Express.js server co-hosted securely providing robust RESTful APIs
+- **Database/Persistence**: Persistent JSON-based relational state model with reliable schema
+- **AI Integration**: Official `@google/genai` TypeScript SDK for regional Indian localized dynamic impact analyses and personalized carbon containment plans
+- **Testing suite**: Vitest automated unit testing runner
 
 ---
 
-## 🛠️ 3. Tech Stack & Implementation Details
+## 🧪 Automated Testing
+This repository uses Vitest for robust unit testing functionality.
+To run the test suite locally:
+```bash
+npm install
+npm run test
+```
 
-*   **Frontend Core:** React 18, Vite, TypeScript (strictly typed data models for profiles, telemetry vectors, and communities), Tailwind CSS.
-*   **Graphics & Visualizations:** Custom HTML5 Canvas 3D Globe (`ThreeGlobe`), Modular D3.js SVGs (Donut Breakdown Ring & 7-Day Multi-Metric Forecast Line Chart).
-*   **Backend Infrastructure:** Express.js & Node.js middleware server proxying calculation routines, containerized inside Cloud Run with an Nginx reverse proxy gateway.
-*   **Database Layer:** Google Cloud Firestore.
-
----
-
-## 🤖 4. How the Solution Works (AI Engine Integration)
-Terra leverages Google's Gemini models through an internal middleware backend proxy. 
-*   **Context-Aware Orchestration:** The AI engine digests past entry historical logs, seasonal city configurations (e.g., grid load context in Chennai, Bangalore, Mumbai), and current streak configurations.
-*   **Dynamic Rulesets:** Rather than spitting out generic text answers, the assistant acts as a smart behavioral coach, processing user constraints to output tailored 7-day carbon diet rulesets.
-
----
-
-## 🔒 5. Security & Engineering Optimizations
-*   **Zero Exposed Keys:** All interactions with the Gemini API and database mutations pass through an Express proxy layer. API tokens never reach the client bundle.
-*   **Responsive Telemetry:** Handled layout aspect ratio warping across diverse viewports by attaching high-efficiency `ResizeObservers` directly to graphical canvas wrapper components.
-*   **HMR WebSocket Overrides:** Configured server-level routing rules to isolate sandboxed iframe HMR conflicts, maintaining completely clean production browser console environments.
+The test runner scans for test matrices under `src/test/*.test.ts` to verify:
+1. Standard vehicle sector carbon coefficients.
+2. Regional Indian electricity grid emissions factors (e.g. South grid vs. West grid).
+3. Realistic public/private transport options.
 
 ---
 
-## 📋 6. Assumptions Made
-1. **Connectivity Transitions:** Assumed volatile user networks; the engine treats background latency and temporary disconnections as expected edge cases rather than system failures.
-2. **Standard Emission Factors:** Utilized localized Indian baseline coefficients for transport types and energy calculations per kilometer/kilowatt-hour.
+## 🚀 Key Standout Features
 
----
+1. **Precision Lok-Sabha/Grid Level Factors**: Unlike simple calculators, our calculations utilize the real Regional Grid Factors of Indian cities (e.g. Bengaluru, Mumbai, Pune, Delhi) ensuring high-precision, actionable telemetry.
+2. **Immersive 3D Celestial Canvas**: Built from scratch using native mathematical projection routines, featuring specular sunlight glints, floating clouds, day-night cycles, and active city pulsing.
+3. **Optimistic UI Engine**: All logged activities are processed via an Optimistic UI state pattern. Logs reflect immediately on dashboard counters, with background transactions synching, and graceful fallback rollback snapshots for state persistence.
+4. **AI-Powered Customized Recommendation engine**: Uses Google Gemini to analyze emission graphs, current streaks, and household contexts to formulate personalized, high-yield actionable nudges.
